@@ -36,15 +36,6 @@ public class EmojiManager extends Application {
     private static Logger LOGGER = LoggerFactory.getLogger(EmojiManager.class);
 
     public static void main(String[] args) {
-        UIDefaults uiDefaults = UIManager.getDefaults();
-        uiDefaults.put("activeCaption", new javax.swing.plaf.ColorUIResource(Color.red));
-        uiDefaults.put("activeCaptionText", new javax.swing.plaf.ColorUIResource(Color.red));
-        JFrame.setDefaultLookAndFeelDecorated(true);
-
-        UIManager.put("InternalFrame.activeTitleBackground", new ColorUIResource(Color.RED ));
-        UIManager.put("InternalFrame.activeTitleForeground", new ColorUIResource(Color.RED));
-        UIManager.put("InternalFrame.titleFont", new Font("Dialog", Font.PLAIN, 11));
-
         launch(args);
     }
 
@@ -54,7 +45,6 @@ public class EmojiManager extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-
         var controller = new NavigationController(this);
     }
 

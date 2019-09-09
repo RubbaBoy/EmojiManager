@@ -23,9 +23,3 @@
 .left-vbox, .left-list {
 	-fx-background-color: #2b579a !important;
 }
-
-.check-box:focused {
-	-fx-border-style: none !important;
-	-fx-border-width: 10;
-	-fx-border-color: red;
-}
