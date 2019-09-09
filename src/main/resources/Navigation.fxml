@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<GridPane prefHeight="600.0" prefWidth="800.0" styleClass="background" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <VBox styleClass="left-vbox" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
+      <ListView fx:id="menuList" maxWidth="200.0" minWidth="200.0" prefWidth="200.0" styleClass="left-list" />
+   </VBox>
+   <BorderPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1">
+      <top>
+         <VBox BorderPane.alignment="CENTER">
+            <children>
+               <HBox>
+                  <children>
+                     <TextField maxHeight="40.0" maxWidth="1.7976931348623157E308" minHeight="40.0" prefHeight="40.0" prefWidth="9999.0">
+                        <HBox.margin>
+                           <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                        </HBox.margin>
+                     </TextField>
+                  </children>
+               </HBox>
+               <FlowPane maxHeight="25.0" prefHeight="25.0">
+                  <children>
+                     <CheckBox mnemonicParsing="false" prefWidth="75.0" text="Static" />
+                     <CheckBox mnemonicParsing="false" prefWidth="100.0" text="Animated" />
+                     <CheckBox mnemonicParsing="false" prefWidth="75.0" text="Regex" />
+                  </children>
+                  <VBox.margin>
+                     <Insets left="5.0" />
+                  </VBox.margin>
+               </FlowPane>
+            </children>
+         </VBox>
+      </top>
+   </BorderPane>
+   <columnConstraints>
+      <ColumnConstraints halignment="LEFT" hgrow="NEVER" maxWidth="200.0" minWidth="200.0" prefWidth="200.0" />
+      <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="200.0" prefWidth="200.0" />
+   </columnConstraints>
+   <rowConstraints>
+      <RowConstraints />
+   </rowConstraints>
+</GridPane>

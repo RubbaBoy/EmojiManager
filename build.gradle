@@ -1,0 +1,71 @@
+plugins {
+    id 'application'
+    id 'idea'
+    id 'java'
+    id 'maven'
+    id 'it.tellnet.sass' version '1.2'
+    id 'com.github.johnrengelman.shadow' version '4.0.2'
+    id 'org.openjfx.javafxplugin' version '0.0.7'
+}
+
+group 'com.uddernetworks.emojimanager'
+version '1.0.0-SNAPSHOT'
+
+sourceCompatibility = 11
+
+mainClassName = 'com.uddernetworks.emojimanager.JFXWorkaround'
+
+sass {
+    sassDir = 'src/main/resources'
+    cssDir = 'src/main/resources'
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+configurations {
+    javafxCompile
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+
+    implementation 'org.apache.commons:commons-lang3:3.9'
+    implementation 'org.ocpsoft.prettytime:prettytime:4.0.2.Final'
+
+    implementation 'org.slf4j:slf4j-api:1.7.25'
+    implementation 'org.slf4j:slf4j-log4j12:1.7.25'
+
+    implementation 'org.jfxtras:jmetro:11.5.8'
+
+    javafxCompile 'org.openjfx:javafx-base:12.0.1:win'
+    javafxCompile 'org.openjfx:javafx-graphics:12.0.1:win'
+    javafxCompile 'org.openjfx:javafx-controls:12.0.1:win'
+    javafxCompile 'org.openjfx:javafx-fxml:12.0.1:win'
+
+    compile configurations.javafxCompile
+}
+
+run {
+    environment.putAll([
+    ])
+
+    jvmArgs("--illegal-access=deny")
+    jvmArgs("--add-opens", "java.base/jdk.internal.loader=ALL-UNNAMED")
+    jvmArgs("--add-opens", "java.base/java.io=ALL-UNNAMED")
+    jvmArgs("--add-opens", "java.base/java.util=ALL-UNNAMED")
+}
+
+task replaceStuff {
+    doLast {
+        println 'SCSS Replace'
+        ant.replaceregexp(match: '@charset "UTF-8";', replace: '') {
+            fileset(dir: 'src/main/resources', includes: '*.css')
+        }
+    }
+}
+
+compileJava.dependsOn sassCompile
+sassCompile.finalizedBy replaceStuff
