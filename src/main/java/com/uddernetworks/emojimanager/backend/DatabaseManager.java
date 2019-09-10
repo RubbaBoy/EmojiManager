@@ -1,6 +1,7 @@
 package com.uddernetworks.emojimanager.backend;
 
 import com.uddernetworks.emojimanager.backend.database.BasicSQLBinder;
+import com.uddernetworks.emojimanager.backend.database.DatabaseEmoji;
 import com.uddernetworks.emojimanager.backend.database.SQLBound;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -13,11 +14,10 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -80,52 +80,65 @@ public class DatabaseManager {
         return dataSource.getConnection();
     }
 
-    public void addEmojis(List<Emote> emojis) {
-        if (emojis.isEmpty()) return;
-        Connection conn = null;
-        try (var connection = getConnection();
-                var statement = connection.prepareStatement(addEmoji)) {
-            conn = connection;
-            connection.setAutoCommit(false);
-            for (Map.Entry<Emote, InputStream> emojiEntry : getBase64Emojis(emojis).entrySet()) {
-                var emoji = emojiEntry.getKey();
-                var guild = emoji.getGuild();
-                if (guild == null) {
-                    LOGGER.error("Guild for {} is null!", emoji.getName());
-                    continue;
+    public CompletableFuture<Void> addEmojis(List<DatabaseEmoji> emojis) {
+        return CompletableFuture.runAsync(() -> {
+            if (emojis.isEmpty()) return;
+            Connection conn = null;
+            try (var connection = getConnection();
+                 var statement = connection.prepareStatement(addEmoji)) {
+                conn = connection;
+                connection.setAutoCommit(false);
+                for (DatabaseEmoji emoji : emojis) {
+                    statement.setLong(1, emoji.getId());
+                    statement.setString(2, emoji.getName());
+                    statement.setBlob(3, emoji.getImage());
+                    statement.setBoolean(4, emoji.isAnimated());
+                    statement.setLong(5, emoji.getServer());
+                    statement.setLong(6, emoji.getCreated());
+                    statement.addBatch();
                 }
-                var inputStream = emojiEntry.getValue();
-                statement.setLong(1, emoji.getIdLong());
-                statement.setString(2, emoji.getName());
-                statement.setBlob(3, inputStream);
-                statement.setBoolean(4, emoji.isAnimated());
-                statement.setLong(5, guild.getIdLong());
-                statement.setLong(6, emoji.getTimeCreated().toEpochSecond() * 1000);
-                statement.addBatch();
-            }
-            statement.executeBatch();
-            connection.commit();
-        } catch (SQLException e) {
-            LOGGER.error("Error adding emojis. Rolling back transaction.", e);
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException ex) {
-                    LOGGER.error("Error rolling back. You're pretty much fucked.", e);
+                statement.executeBatch();
+                connection.commit();
+            } catch (SQLException e) {
+                LOGGER.error("Error adding emojis. Rolling back transaction.", e);
+                if (conn != null) {
+                    try {
+                        conn.rollback();
+                    } catch (SQLException ex) {
+                        LOGGER.error("Error rolling back. You're pretty much fucked.", e);
+                    }
                 }
             }
-        }
+        });
     }
 
-    public Map<Emote, InputStream> getBase64Emojis(List<Emote> emojis) {
-        return emojis.parallelStream().collect(Collectors.toMap(e -> e, e -> {
-            try {
-                return new BufferedInputStream(new URL(e.getImageUrl()).openConnection().getInputStream());
-            } catch (IOException ex) {
-                LOGGER.error("Error fetching image", ex);
-                return null;
+    public CompletableFuture<Void> removeNotContaining(long serverId, List<DatabaseEmoji> emojis) {
+        return CompletableFuture.runAsync(() -> {
+            var string = emojis.stream().map(emoji -> "id != " + emoji.getId() + " AND ").collect(Collectors.joining());
+            string = string.substring(0, string.length() - 5) + ";";
+            try (var connection = getConnection();
+                 var statement = connection.prepareStatement("DELETE FROM emojis WHERE server = " + serverId + " AND " + string)) {
+                statement.executeUpdate();
+            } catch (SQLException e) {
+                LOGGER.error("Error removing extra emojis", e);
             }
-        }));
+        });
+    }
+
+    private List<GenericMap> iterResultSet(ResultSet resultSet) throws SQLException {
+        var meta = resultSet.getMetaData();
+        int columns = meta.getColumnCount();
+
+        var rows = new ArrayList<GenericMap>();
+        while (resultSet.next()) {
+            var row = new GenericMap();
+            for(int i = 1; i <= columns; ++i){
+                row.put(meta.getColumnName(i).toLowerCase(), resultSet.getObject(i));
+            }
+            rows.add(row);
+        }
+
+        return List.copyOf(rows);
     }
 
 }
