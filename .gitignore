@@ -2,4 +2,6 @@
 .idea
 *.class
 build
+out
 token
+/database

@@ -6,8 +6,6 @@ import com.uddernetworks.emojimanager.tabs.TabItem;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
@@ -26,10 +24,10 @@ public class NavigationController extends Stage {
     @FXML
     private BorderPane paneContent;
 
-    private EmojiManager emojiManager;
+    private MainGUI mainGUI;
 
-    public NavigationController(EmojiManager emojiManager) {
-        this.emojiManager = emojiManager;
+    public NavigationController(MainGUI mainGUI) {
+        this.mainGUI = mainGUI;
 
         GUIUtils.loadScene(this, "/Navigation.fxml", "/menu.css");
 

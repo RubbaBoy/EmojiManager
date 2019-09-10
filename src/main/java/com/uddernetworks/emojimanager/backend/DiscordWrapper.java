@@ -13,12 +13,7 @@ public class DiscordWrapper {
 
     private static Logger LOGGER = LoggerFactory.getLogger(DiscordWrapper.class);
 
-    public static void main(String[] args) {
-        new DiscordWrapper().connect();
-    }
-
-    public void connect() {
-
+    public void connect(Object... listeners) {
         new TokenListener().getToken(token -> {
             LOGGER.info("Found token: {}", token);
 
@@ -27,7 +22,7 @@ public class DiscordWrapper {
                         .setToken(token)
                         .setStatus(OnlineStatus.ONLINE)
                         .setActivity(Activity.playing("Emoji Manager"))
-//                        .addEventListeners(this)
+                        .addEventListeners(listeners)
                         .build();
 
                 Thread.sleep(10000);

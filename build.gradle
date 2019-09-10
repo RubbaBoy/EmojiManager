@@ -34,14 +34,18 @@ dependencies {
 
     implementation 'org.apache.commons:commons-lang3:3.9'
     implementation 'org.ocpsoft.prettytime:prettytime:4.0.2.Final'
+    implementation 'com.electronwill.night-config:hocon:3.6.0'
 
     implementation 'org.slf4j:slf4j-api:1.7.25'
     implementation 'org.slf4j:slf4j-log4j12:1.7.25'
 
-    implementation 'org.jfxtras:jmetro:11.5.8'
-
     implementation 'net.dv8tion:JDA:4.BETA.0_32'
 
+    implementation 'com.zaxxer:HikariCP:2.7.8'
+    implementation 'mysql:mysql-connector-java:5.1.6'
+    implementation 'org.hsqldb:hsqldb:2.4.1'
+
+    implementation 'org.jfxtras:jmetro:11.5.8'
     javafxCompile 'org.openjfx:javafx-base:12.0.1:win'
     javafxCompile 'org.openjfx:javafx-graphics:12.0.1:win'
     javafxCompile 'org.openjfx:javafx-controls:12.0.1:win'
