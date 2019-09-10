@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS emojis (
     id BIGINT NOT NULL PRIMARY KEY,
     name VARCHAR(64) NOT NULL,
-    image LONGBLOB NOT NULL,
+    image VARCHAR(100) NOT NULL,
     animated BOOLEAN,
     server BIGINT NOT NULL,
     created BIGINT NOT NULL

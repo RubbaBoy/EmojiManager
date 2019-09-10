@@ -91,7 +91,7 @@ public class DatabaseManager {
                 for (DatabaseEmoji emoji : emojis) {
                     statement.setLong(1, emoji.getId());
                     statement.setString(2, emoji.getName());
-                    statement.setBlob(3, emoji.getImage());
+                    statement.setString(3, emoji.getImage());
                     statement.setBoolean(4, emoji.isAnimated());
                     statement.setLong(5, emoji.getServer());
                     statement.setLong(6, emoji.getCreated());

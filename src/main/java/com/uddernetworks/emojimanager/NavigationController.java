@@ -1,6 +1,7 @@
 package com.uddernetworks.emojimanager;
 
 import com.sun.javafx.collections.ObservableListWrapper;
+import com.uddernetworks.emojimanager.backend.EmojiManager;
 import com.uddernetworks.emojimanager.tabs.Emojis;
 import com.uddernetworks.emojimanager.tabs.TabItem;
 import javafx.application.Platform;
@@ -26,13 +27,13 @@ public class NavigationController extends Stage {
 
     private MainGUI mainGUI;
 
-    public NavigationController(MainGUI mainGUI) {
+    public NavigationController(MainGUI mainGUI, EmojiManager emojiManager) {
         this.mainGUI = mainGUI;
 
         GUIUtils.loadScene(this, "/Navigation.fxml", "/menu.css");
 
         menuList.setItems(new ObservableListWrapper<>(Arrays.asList(
-                new TabItem("Emojis", new Emojis()),
+                new TabItem("Emojis", new Emojis(emojiManager)),
                 new TabItem("Servers", null),
                 new TabItem("Backups", null),
                 new TabItem("Settings", null))

@@ -16,7 +16,7 @@ public class DatabaseEmoji {
 
     private final long id;
     private String name;
-    private InputStream image;
+    private String image;
     private boolean animated;
     private long server;
     private long created;
@@ -24,25 +24,16 @@ public class DatabaseEmoji {
     private boolean modified;
 
     public DatabaseEmoji(Emote emoji) {
-        this(emoji.getIdLong(), emoji.getName(), createBytesFromUrl(emoji.getImageUrl()), emoji.isAnimated(), emoji.getGuild().getIdLong(), emoji.getTimeCreated().toEpochSecond());
+        this(emoji.getIdLong(), emoji.getName(), emoji.getImageUrl(), emoji.isAnimated(), emoji.getGuild().getIdLong(), emoji.getTimeCreated().toEpochSecond());
     }
 
-    public DatabaseEmoji(long id, String name, InputStream image, boolean animated, long server, long created) {
+    public DatabaseEmoji(long id, String name, String image, boolean animated, long server, long created) {
         this.id = id;
         this.name = name;
         this.image = image;
         this.animated = animated;
         this.server = server;
         this.created = created;
-    }
-
-    private static InputStream createBytesFromUrl(String url) {
-        try {
-            return new URL(url).openConnection().getInputStream();
-        } catch (IOException e) {
-            LOGGER.error("Error while reading image URL: " + url, e);
-            return null;
-        }
     }
 
     public long getId() {
@@ -58,11 +49,11 @@ public class DatabaseEmoji {
         modified = true;
     }
 
-    public InputStream getImage() {
-        return new BufferedInputStream(image);
+    public String getImage() {
+        return image;
     }
 
-    public void setImage(InputStream image) {
+    public void setImage(String image) {
         this.image = image;
         modified = true;
     }

@@ -26,17 +26,20 @@ public class EmojiManager extends ListenerAdapter {
     private ConfigManager configManager;
 
     private List<DatabaseEmoji> emojis;
+    private Runnable callback;
 
     public static void main(String[] args) {
-        new EmojiManager().connect();
+        new EmojiManager().connect(() -> {});
     }
 
-    public void connect() {
+    public void connect(Runnable callback) {
+        this.callback = callback;
         (configManager = new ConfigManager("config.conf")).init();
         databaseManager = new DatabaseManager(new File("database").getAbsoluteFile());
 
         discordWrapper = new DiscordWrapper();
         discordWrapper.connect(this);
+        LOGGER.info("DONE CONNECTING@");
     }
 
     @Override
@@ -63,9 +66,15 @@ public class EmojiManager extends ListenerAdapter {
         });
 
         LOGGER.info("Done initializing {} total emojis", emojis.size());
+
+        callback.run();
     }
 
     public List<DatabaseEmoji> getEmojis() {
         return emojis;
+    }
+
+    public DiscordWrapper getDiscordWrapper() {
+        return discordWrapper;
     }
 }
