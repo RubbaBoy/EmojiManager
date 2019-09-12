@@ -46,6 +46,8 @@ dependencies {
     implementation 'org.hsqldb:hsqldb:2.4.1'
 
     implementation 'org.jfxtras:jmetro:11.5.8'
+    implementation 'org.controlsfx:controlsfx:11.0.0'
+
     javafxCompile 'org.openjfx:javafx-base:12.0.1:win'
     javafxCompile 'org.openjfx:javafx-graphics:12.0.1:win'
     javafxCompile 'org.openjfx:javafx-controls:12.0.1:win'

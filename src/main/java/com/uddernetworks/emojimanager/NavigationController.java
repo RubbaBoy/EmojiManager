@@ -2,8 +2,9 @@ package com.uddernetworks.emojimanager;
 
 import com.sun.javafx.collections.ObservableListWrapper;
 import com.uddernetworks.emojimanager.backend.EmojiManager;
-import com.uddernetworks.emojimanager.tabs.Emojis;
+import com.uddernetworks.emojimanager.tabs.emojis.Emojis;
 import com.uddernetworks.emojimanager.tabs.TabItem;
+import com.uddernetworks.emojimanager.tabs.servers.Servers;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
@@ -34,7 +35,7 @@ public class NavigationController extends Stage {
 
         menuList.setItems(new ObservableListWrapper<>(Arrays.asList(
                 new TabItem("Emojis", new Emojis(emojiManager)),
-                new TabItem("Servers", null),
+                new TabItem("Servers", new Servers()),
                 new TabItem("Backups", null),
                 new TabItem("Settings", null))
         ));
@@ -48,7 +49,7 @@ public class NavigationController extends Stage {
             }
         });
 
-        menuList.getSelectionModel().select(0);
+        menuList.getSelectionModel().select(1);
 
         Platform.runLater(() -> {
             var bounds = menuList.lookup(".list-cell").getBoundsInLocal();

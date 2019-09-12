@@ -1,14 +1,8 @@
 package com.uddernetworks.emojimanager.backend.database;
 
-import com.uddernetworks.emojimanager.backend.DatabaseManager;
 import net.dv8tion.jda.api.entities.Emote;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 
 public class DatabaseEmoji {
 

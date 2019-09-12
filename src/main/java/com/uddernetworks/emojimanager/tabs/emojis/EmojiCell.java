@@ -16,12 +16,15 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 
 import java.io.IOException;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class EmojiCell {
 
     private DatabaseEmoji emoji;
     private StackPane pane;
     private boolean selected = false;
+    private BiConsumer<EmojiCell, Boolean> onSelect = (e, b) -> {};
 
     public EmojiCell(DiscordWrapper discord, DatabaseEmoji emoji) {
         this.emoji = emoji;
@@ -89,10 +92,21 @@ public class EmojiCell {
             } else {
                 paneClasses.remove("selected");
             }
+
+            onSelect.accept(this, selected);
         });
+    }
+
+    public DatabaseEmoji getEmoji() {
+        return emoji;
     }
 
     public StackPane getPane() {
         return pane;
+    }
+
+    public EmojiCell setOnSelect(BiConsumer<EmojiCell, Boolean> onSelect) {
+        this.onSelect = onSelect;
+        return this;
     }
 }

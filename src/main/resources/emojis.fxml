@@ -17,7 +17,7 @@
             <children>
             <StackPane>
                <children>
-                    <TextField maxWidth="1.7976931348623157E308" prefHeight="35.0" promptText="Search" StackPane.alignment="CENTER_LEFT" />
+                    <TextField fx:id="search" maxWidth="1.7976931348623157E308" prefHeight="35.0" promptText="Search" StackPane.alignment="CENTER_LEFT" />
                </children>
                 <VBox.margin>
                     <Insets bottom="10.0" left="5.0" right="5.0" top="10.0" />
@@ -25,15 +25,15 @@
             </StackPane>
                 <FlowPane maxHeight="25.0" prefHeight="25.0">
                     <children>
-                        <CheckBox mnemonicParsing="false" text="Static">
+                        <CheckBox fx:id="unanimated" mnemonicParsing="false" text="Static">
                      <FlowPane.margin>
                         <Insets right="10.0" />
                      </FlowPane.margin></CheckBox>
-                        <CheckBox mnemonicParsing="false" text="Animated">
+                        <CheckBox fx:id="animated" mnemonicParsing="false" text="Animated">
                      <FlowPane.margin>
                         <Insets right="10.0" />
                      </FlowPane.margin></CheckBox>
-                        <CheckBox mnemonicParsing="false" text="Regex">
+                        <CheckBox fx:id="regex" mnemonicParsing="false" text="Regex">
                      <FlowPane.margin>
                         <Insets right="10.0" />
                      </FlowPane.margin></CheckBox>

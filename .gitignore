@@ -5,4 +5,4 @@ build
 out
 token
 /database
-menu.css
+*.css
