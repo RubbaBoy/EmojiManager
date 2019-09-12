@@ -18,7 +18,7 @@
             <Insets left="5.0" right="5.0" top="10.0" />
          </BorderPane.margin>
          <content>
-            <FlowPane fx:id="emojiContent" hgap="10.0" minWidth="210.0" prefHeight="200.0" vgap="10.0" />
+            <FlowPane fx:id="serverContent" hgap="20.0" minWidth="210.0" prefHeight="200.0" vgap="20.0" />
          </content>
       </ScrollPane>
    </center>

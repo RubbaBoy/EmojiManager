@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 public interface GUITab extends Initializable {
     String getFile();
+    Pane getCachedPane() throws IOException;
     default Pane getPane() throws IOException {
         var file = getFile();
         var loader = new FXMLLoader(getClass().getClassLoader().getResource(file));

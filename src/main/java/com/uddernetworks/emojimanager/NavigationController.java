@@ -35,7 +35,7 @@ public class NavigationController extends Stage {
 
         menuList.setItems(new ObservableListWrapper<>(Arrays.asList(
                 new TabItem("Emojis", new Emojis(emojiManager)),
-                new TabItem("Servers", new Servers()),
+                new TabItem("Servers", new Servers(emojiManager)),
                 new TabItem("Backups", null),
                 new TabItem("Settings", null))
         ));
@@ -43,7 +43,7 @@ public class NavigationController extends Stage {
         menuList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             LOGGER.info("Selected {}", newValue.getName());
             try {
-                paneContent.setCenter(newValue.getGuiTab().getPane());
+                paneContent.setCenter(newValue.getGuiTab().getCachedPane());
             } catch (IOException e) {
                 LOGGER.error("Error loading page " + newValue.getName(), e);
             }

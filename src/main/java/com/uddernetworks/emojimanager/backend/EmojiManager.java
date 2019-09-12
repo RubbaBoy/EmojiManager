@@ -2,6 +2,7 @@ package com.uddernetworks.emojimanager.backend;
 
 import com.uddernetworks.emojimanager.backend.database.DatabaseEmoji;
 import com.uddernetworks.emojimanager.config.ConfigManager;
+import javafx.application.Platform;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -13,6 +14,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class EmojiManager extends ListenerAdapter {
@@ -48,6 +50,10 @@ public class EmojiManager extends ListenerAdapter {
         jda = event.getJDA();
         selfId = jda.getSelfUser().getIdLong();
 
+        CompletableFuture.runAsync(this::initEmojis).thenRun(() -> Platform.runLater(callback));
+    }
+
+    public void initEmojis() {
         List<Long> servers = configManager.getConfig().get("servers");
 
         LOGGER.info("Loading {} guilds", servers.size());
@@ -66,8 +72,10 @@ public class EmojiManager extends ListenerAdapter {
         });
 
         LOGGER.info("Done initializing {} total emojis", emojis.size());
+    }
 
-        callback.run();
+    public JDA getJda() {
+        return jda;
     }
 
     public List<DatabaseEmoji> getEmojis() {
@@ -76,5 +84,13 @@ public class EmojiManager extends ListenerAdapter {
 
     public DiscordWrapper getDiscordWrapper() {
         return discordWrapper;
+    }
+
+    public DatabaseManager getDatabaseManager() {
+        return databaseManager;
+    }
+
+    public ConfigManager getConfigManager() {
+        return configManager;
     }
 }

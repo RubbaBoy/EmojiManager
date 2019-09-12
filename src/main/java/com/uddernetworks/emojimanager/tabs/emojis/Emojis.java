@@ -7,10 +7,12 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,6 +52,7 @@ public class Emojis extends Stage implements GUITab {
     @FXML
     private Button deleteButton;
 
+    private Pane cachedPane;
     private SearchHelper searchHelper;
     private EmojiManager emojiManager;
     private BiConsumer<EmojiCell, Boolean> onSelectCell;
@@ -58,12 +61,19 @@ public class Emojis extends Stage implements GUITab {
     private String lastSearchText = "";
 
     public Emojis(EmojiManager emojiManager) {
+        LOGGER.warn("NEW EMOJI!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         this.emojiManager = emojiManager;
     }
 
     @Override
     public String getFile() {
         return "emojis.fxml";
+    }
+
+    @Override
+    public Pane getCachedPane() throws IOException {
+        if (cachedPane != null) return cachedPane;
+        return (cachedPane = getPane());
     }
 
     @Override

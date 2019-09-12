@@ -17,14 +17,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiConsumer;
 
 public class ServerSlot {
 
     private static Logger LOGGER = LoggerFactory.getLogger(ServerSlot.class);
 
     private StackPane pane;
+    private boolean enabled;
+    private BiConsumer<Long, Boolean> onEnableToggle;
+    private String name;
 
-    public ServerSlot(String name, int used, int total, boolean enabled) {
+    public ServerSlot(String name, long id, int used, int total, boolean enabled) {
+        this.name = name;
+        this.enabled = enabled;
         pane = new StackPane();
         pane.setPrefHeight(200.0);
         pane.setPrefWidth(200.0);
@@ -95,9 +101,13 @@ public class ServerSlot {
 
         var toggle = new ToggleSwitch();
         toggle.setSelected(enabled);
+        toggle.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            this.enabled = newValue;
+            if (onEnableToggle != null) onEnableToggle.accept(id, newValue);
+        });
         Platform.runLater(() -> {
-            var thumbArea = (StackPane) toggle.getChildrenUnmodifiable().get(1);
-            toggle.setPadding(new Insets(15, 0, 0, 100 - (thumbArea.getWidth() / 2D)));
+//            var thumbArea = (StackPane) toggle.getChildrenUnmodifiable().get(1);
+            toggle.setPadding(new Insets(15, 0, 0, 100 - (42 / 2D)));
         });
 
         contentContainer.getChildren().addAll(titleLabel, amountLabel, toggle);
@@ -106,5 +116,18 @@ public class ServerSlot {
 
     public StackPane getPane() {
         return pane;
+    }
+
+    public ServerSlot setOnEnableToggle(BiConsumer<Long, Boolean> onEnableToggle) {
+        this.onEnableToggle = onEnableToggle;
+        return this;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public String getName() {
+        return name;
     }
 }
