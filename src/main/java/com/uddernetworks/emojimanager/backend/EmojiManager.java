@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -26,8 +27,9 @@ public class EmojiManager extends ListenerAdapter {
     private DiscordWrapper discordWrapper;
     private DatabaseManager databaseManager;
     private ConfigManager configManager;
+    private boolean emojisChanged;
 
-    private List<DatabaseEmoji> emojis;
+    private List<DatabaseEmoji> emojis = Collections.synchronizedList(new ArrayList<>());
     private Runnable callback;
 
     public static void main(String[] args) {
@@ -54,11 +56,12 @@ public class EmojiManager extends ListenerAdapter {
     }
 
     public void initEmojis() {
+        emojisChanged = !emojis.isEmpty();
         List<Long> servers = configManager.getConfig().get("servers");
 
         LOGGER.info("Loading {} guilds", servers.size());
 
-        emojis = new ArrayList<>();
+        emojis.clear();
         servers.stream().map(id -> jda.getGuildById(id)).filter(Objects::nonNull).forEach(guild -> {
             var emojis = guild.getEmotes().stream().map(DatabaseEmoji::new).collect(Collectors.toList());
             this.emojis.addAll(emojis);
@@ -76,6 +79,12 @@ public class EmojiManager extends ListenerAdapter {
 
     public JDA getJda() {
         return jda;
+    }
+
+    public boolean haveEmojisChanged() {
+        var res = emojisChanged;
+        emojisChanged = false;
+        return res;
     }
 
     public List<DatabaseEmoji> getEmojis() {

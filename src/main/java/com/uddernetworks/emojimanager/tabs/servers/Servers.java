@@ -15,7 +15,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 public class Servers extends Stage implements GUITab {
 
@@ -39,16 +41,17 @@ public class Servers extends Stage implements GUITab {
     }
 
     @Override
-    public Pane getCachedPane() throws IOException {
-        if (cachedPane != null) return cachedPane;
-        return (cachedPane = getPane());
+    public CompletableFuture<Pane> getCachedPane() throws IOException {
+        if (cachedPane != null) return CompletableFuture.completedFuture(cachedPane);
+        return CompletableFuture.completedFuture(cachedPane = getPane());
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         LOGGER.info("Initializing server GUI...");
         serverContent.getStylesheets().add("servers.css");
-        List<Long> servers = emojiManager.getConfigManager().getConfig().get("servers");
+        var config = emojiManager.getConfigManager().getConfig();
+        List<Long> servers = config.get("servers");
 
         onServerEnableToggle = (serverId, enabled) -> {
             if (enabled) {
@@ -56,6 +59,7 @@ public class Servers extends Stage implements GUITab {
             } else {
                 servers.remove(serverId);
             }
+            config.set("servers", servers);
             emojiManager.initEmojis();
             layoutServers();
         };
@@ -71,9 +75,10 @@ public class Servers extends Stage implements GUITab {
     }
 
     private void layoutServers() {
-        serverSlots.stream()
+        serverContent.getChildren().setAll(serverSlots.stream()
                 .sorted(Comparator.comparing(ServerSlot::getName))
                 .sorted(Comparator.comparing(slot -> !slot.isEnabled()))
-                .forEach(slot -> serverContent.getChildren().add(slot.getPane()));
+                .map(ServerSlot::getPane)
+                .collect(Collectors.toUnmodifiableList()));
     }
 }

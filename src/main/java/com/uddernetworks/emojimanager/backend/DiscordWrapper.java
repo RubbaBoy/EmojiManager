@@ -9,14 +9,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.security.auth.login.LoginException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class DiscordWrapper {
 
     private static Logger LOGGER = LoggerFactory.getLogger(DiscordWrapper.class);
 
-    private Map<Long, String> guildNameCache = new HashMap<>();
+    private Map<Long, String> guildNameCache = Collections.synchronizedMap(new HashMap<>());
 
     private JDA jda;
 

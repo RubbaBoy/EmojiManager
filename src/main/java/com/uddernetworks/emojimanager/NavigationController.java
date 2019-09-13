@@ -43,7 +43,10 @@ public class NavigationController extends Stage {
         menuList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             LOGGER.info("Selected {}", newValue.getName());
             try {
-                paneContent.setCenter(newValue.getGuiTab().getCachedPane());
+                newValue.getGuiTab().getCachedPane().thenAccept(center -> Platform.runLater(() -> paneContent.setCenter(center))).exceptionally(e -> {
+                    LOGGER.error("Error loading page " + newValue.getName(), e);
+                    return null;
+                });
             } catch (IOException e) {
                 LOGGER.error("Error loading page " + newValue.getName(), e);
             }
