@@ -25,16 +25,16 @@ public class MainGUI extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-//        CompletableFuture.runAsync(() -> {
-//            (emojiManager = new EmojiManager()).connect(() -> {
-//                Platform.runLater(() -> {
+        CompletableFuture.runAsync(() -> {
+            (emojiManager = new EmojiManager()).connect(() -> {
+                Platform.runLater(() -> {
                     new NavigationController(this, emojiManager);
-//                });
-//            });
-//        })
-//        .exceptionally(t -> {
-//            LOGGER.error("Error starting", t);
-//            return null;
-//        });
+                });
+            });
+        })
+        .exceptionally(t -> {
+            LOGGER.error("Error starting", t);
+            return null;
+        });
     }
 }

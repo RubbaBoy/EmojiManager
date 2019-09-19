@@ -1,20 +1,14 @@
 package com.uddernetworks.emojimanager.tabs.backups;
 
 import com.uddernetworks.emojimanager.tabs.servers.ServerSlot;
-import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Group;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.*;
 import javafx.scene.text.TextAlignment;
-import org.controlsfx.control.ToggleSwitch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,17 +20,16 @@ import java.util.function.BiConsumer;
 
 public class BackupSlot  {
 
-    private boolean selected;
     private static Logger LOGGER = LoggerFactory.getLogger(ServerSlot.class);
 
     private StackPane pane;
-    private boolean enabled;
-    private BiConsumer<File, Boolean> onEnableToggle;
+    private boolean selected;
+    private BiConsumer<File, Boolean> onSelectedToggle;
     private String name;
 
-    public BackupSlot(String name, File file, long date, long size, int emojis, boolean enabled) {
+    public BackupSlot(String name, File file, long date, long size, int emojis, boolean selected) {
         this.name = name;
-        this.enabled = enabled;
+        this.selected = selected;
         pane = new StackPane();
         pane.setPrefHeight(250);
         pane.setPrefWidth(250);
@@ -93,20 +86,20 @@ public class BackupSlot  {
         var checkBox = new CheckBox();
         checkBox.setAlignment(Pos.TOP_RIGHT);
         checkBox.setPadding(new Insets(0, 0, 75 - 15, 225 - 15));
-        checkBox.setSelected(enabled);
+        checkBox.setSelected(selected);
         checkBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
-            this.enabled = newValue;
-            if (onEnableToggle != null) onEnableToggle.accept(file, newValue);
+            this.selected = newValue;
+            if (onSelectedToggle != null) onSelectedToggle.accept(file, newValue);
         });
 
         pane.setOnMouseClicked(event -> {
-            if (selected = !selected) {
+            if (this.selected = !this.selected) {
                 paneClasses.add("selected");
             } else {
                 paneClasses.remove("selected");
             }
 
-            checkBox.setSelected(selected);
+            checkBox.setSelected(this.selected);
         });
 
         contentContainer.getChildren().addAll(titleLabel, dateLabel, bottomText);
@@ -117,13 +110,13 @@ public class BackupSlot  {
         return pane;
     }
 
-    public BackupSlot setOnEnableToggle(BiConsumer<File, Boolean> onEnableToggle) {
-        this.onEnableToggle = onEnableToggle;
+    public BackupSlot setOnSelectedToggle(BiConsumer<File, Boolean> onSelectedToggle) {
+        this.onSelectedToggle = onSelectedToggle;
         return this;
     }
 
-    public boolean isEnabled() {
-        return enabled;
+    public boolean isSelected() {
+        return selected;
     }
 
     public String getName() {
