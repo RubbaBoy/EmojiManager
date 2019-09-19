@@ -1,0 +1,101 @@
+$fontRegular: "Segoe UI";
+//$fontRegular: "Source Sans Pro";
+$fontSemibold: $fontRegular + " Semibold";
+
+.list-cell:filled:selected:focused, .list-cell:filled:selected {
+    -fx-background-color: #426cad !important;
+    -fx-text-fill: white !important;
+}
+
+.list-cell {
+    -fx-background-color: #2b579a !important;
+    -fx-text-fill: white !important;
+    -fx-cell-size: 3.4em; /* 24 */
+    -fx-font: 12px $fontSemibold;
+    -fx-alignment: CENTER_LEFT;
+    -fx-border-color: transparent;
+    -fx-cursor: hand !important;
+}
+
+.list-cell:selected:hover {
+    -fx-background-color: #13418b !important;
+    -fx-text-fill: white !important;
+}
+
+.left-vbox, .left-list {
+    -fx-background-color: #2b579a !important;
+}
+
+.emojiCell {
+    -fx-background-color: darken(white, 10%);
+    -fx-border-color: #cccccc;
+    -fx-border-width: 1px;
+    -fx-cursor: hand !important;
+
+    .image {
+        -fx-border-width: 5px;
+        -fx-border-color: transparent;
+    }
+
+    .emojiName {
+        -fx-font-weight: bold;
+        -fx-font-size: 17px;
+    }
+
+    &.selected {
+        -fx-border-color: lighten(#426cad, 10%) !important;
+        -fx-border-width: 3px;
+        -fx-padding: -2px;
+    }
+}
+
+.serverSlot {
+    -fx-background-color: transparent;
+    .background {
+        -fx-background-color: #E6E6E6;
+        -fx-border-radius: 50%;
+        -fx-border-color: #CCCCCC;
+        -fx-border-width: 1;
+    }
+
+    .arc {
+        -fx-stroke: #2BFF26;
+    }
+
+    .outerArc {
+        -fx-stroke: #CCCCCC;
+    }
+
+    .title {
+        -fx-font-family: $fontSemibold, sans-serif;
+        -fx-font-size: 23px;
+    }
+
+    .amount {
+        -fx-font-family: $fontRegular, sans-serif;
+        -fx-font-size: 21px;
+    }
+
+    .stuff {
+        -fx-background-color: red;
+        -fx-opacity: 80%;
+    }
+}
+
+.backupSlot {
+    -fx-background-color: darken(white, 10%);
+    -fx-border-color: #cccccc;
+    -fx-border-width: 1px;
+    -fx-cursor: hand !important;
+
+    .title {
+        -fx-font-family: $fontSemibold, sans-serif;
+        //-fx-font-weight: 600;
+        -fx-font-size: 23px;
+    }
+
+    .otherText, .sizeText, .countText {
+        -fx-font-family: $fontRegular, sans-serif;
+        -fx-font-size: 21px;
+    }
+}

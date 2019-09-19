@@ -49,7 +49,6 @@ public class Servers extends Stage implements GUITab {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         LOGGER.info("Initializing server GUI...");
-        serverContent.getStylesheets().add("servers.css");
         var config = emojiManager.getConfigManager().getConfig();
         List<Long> servers = config.get("servers");
 

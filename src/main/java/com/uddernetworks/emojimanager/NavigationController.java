@@ -2,6 +2,7 @@ package com.uddernetworks.emojimanager;
 
 import com.sun.javafx.collections.ObservableListWrapper;
 import com.uddernetworks.emojimanager.backend.EmojiManager;
+import com.uddernetworks.emojimanager.tabs.backups.Backups;
 import com.uddernetworks.emojimanager.tabs.emojis.Emojis;
 import com.uddernetworks.emojimanager.tabs.TabItem;
 import com.uddernetworks.emojimanager.tabs.servers.Servers;
@@ -31,12 +32,12 @@ public class NavigationController extends Stage {
     public NavigationController(MainGUI mainGUI, EmojiManager emojiManager) {
         this.mainGUI = mainGUI;
 
-        GUIUtils.loadScene(this, "/Navigation.fxml", "/menu.css");
+        GUIUtils.loadScene(this, "/Navigation.fxml", "/style.css");
 
         menuList.setItems(new ObservableListWrapper<>(Arrays.asList(
                 new TabItem("Emojis", new Emojis(emojiManager)),
                 new TabItem("Servers", new Servers(emojiManager)),
-                new TabItem("Backups", null),
+                new TabItem("Backups", new Backups(emojiManager)),
                 new TabItem("Settings", null))
         ));
 
@@ -52,10 +53,12 @@ public class NavigationController extends Stage {
             }
         });
 
-        menuList.getSelectionModel().select(1);
+        menuList.getSelectionModel().select(2);
 
         Platform.runLater(() -> {
-            var bounds = menuList.lookup(".list-cell").getBoundsInLocal();
+            var cell = menuList.lookup(".list-cell");
+            if (cell == null) return;
+            var bounds = cell.getBoundsInLocal();
             menuList.setPrefHeight(2 + menuList.getItems().size() * bounds.getHeight());
         });
     }
