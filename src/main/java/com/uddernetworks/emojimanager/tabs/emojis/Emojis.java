@@ -144,8 +144,8 @@ public class Emojis extends Stage implements GUITab {
                 chooser.setInitialDirectory(BACKUP_PARENT);
                 chooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Image", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp"));
             }, files -> {
-                files.forEach(file -> {
-                    LOGGER.info("Uploading {}", file.getAbsolutePath());
+                emojiManager.uploadEmojis(files).thenRun(() -> {
+                    LOGGER.info("Completed uploading of emojis!");
                 });
             });
         });
