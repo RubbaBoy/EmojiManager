@@ -12,6 +12,8 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -25,6 +27,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class Backups extends Stage implements GUITab {
+
+    private static Logger LOGGER = LoggerFactory.getLogger(Backups.class);
 
     @FXML
     private FlowPane backupContent;
@@ -61,6 +65,7 @@ public class Backups extends Stage implements GUITab {
                     var emojiCount = AttributeUtils.read(file, "Emojis");
                     return new BackupSlot(file.getName(), file, attrs.creationTime().toMillis(), file.length(), StringUtils.isNumeric(emojiCount) ? Integer.parseInt(emojiCount) : 0, false);
                 } catch (IOException e) {
+                    LOGGER.info("Error processing backup file " + file.getAbsolutePath(), e);
                     return null;
                 }
             }).filter(Objects::nonNull)

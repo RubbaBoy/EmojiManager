@@ -33,6 +33,7 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 
     implementation 'org.apache.commons:commons-lang3:3.9'
+    implementation 'commons-io:commons-io:2.6'
     implementation 'org.ocpsoft.prettytime:prettytime:4.0.2.Final'
     implementation 'com.electronwill.night-config:hocon:3.6.0'
 

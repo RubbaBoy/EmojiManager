@@ -1,6 +1,7 @@
 package com.uddernetworks.emojimanager;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -25,15 +26,19 @@ public class AttributeUtils {
     }
 
     public static String read(File file, String name) throws IOException {
-        return read(file.toPath(), name);
+        return read(file.toPath().toAbsolutePath(), name);
     }
 
     public static String read(Path path, String name) throws IOException {
-        var view = Files.getFileAttributeView(path, UserDefinedFileAttributeView.class);
-        var readBuffer = ByteBuffer.allocate(view.size(name));
-        view.read(name, readBuffer);
-        readBuffer.flip();
-        return new String(readBuffer.array());
+        try {
+            var view = Files.getFileAttributeView(path, UserDefinedFileAttributeView.class);
+            var readBuffer = ByteBuffer.allocate(view.size(name));
+            view.read(name, readBuffer);
+            readBuffer.flip();
+            return new String(readBuffer.array());
+        } catch (FileNotFoundException ignored) {
+            return "";
+        }
     }
 
 }
