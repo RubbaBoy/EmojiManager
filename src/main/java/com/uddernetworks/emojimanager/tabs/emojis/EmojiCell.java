@@ -97,6 +97,15 @@ public class EmojiCell {
         });
     }
 
+    public void noEventSelect() {
+        var paneClasses = pane.getStyleClass();
+        if (!paneClasses.contains("selected")) paneClasses.add("selected");
+    }
+
+    public void noEventUnSelect() {
+        pane.getStyleClass().remove("selected");
+    }
+
     public DatabaseEmoji getEmoji() {
         return emoji;
     }

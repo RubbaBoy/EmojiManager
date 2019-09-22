@@ -1,5 +1,6 @@
 package com.uddernetworks.emojimanager.utils;
 
+import javafx.application.Platform;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 
@@ -11,27 +12,35 @@ import java.util.function.Consumer;
 public class FileDirectoryChooser {
 
     public static void openFileSelector(Consumer<FileChooser> chooserModifier, Consumer<File> onSelected) {
-        var fileChooser = new FileChooser();
-        chooserModifier.accept(fileChooser);
-        Optional.ofNullable(fileChooser.showOpenDialog(null)).ifPresent(onSelected);
+        Platform.runLater(() -> {
+            var fileChooser = new FileChooser();
+            chooserModifier.accept(fileChooser);
+            Optional.ofNullable(fileChooser.showOpenDialog(null)).ifPresent(onSelected);
+        });
     }
 
     public static void openMultiFileSelector(Consumer<FileChooser> chooserModifier, Consumer<List<File>> onSelected) {
-        var fileChooser = new FileChooser();
-        chooserModifier.accept(fileChooser);
-        Optional.ofNullable(fileChooser.showOpenMultipleDialog(null)).ifPresent(onSelected);
+        Platform.runLater(() -> {
+            var fileChooser = new FileChooser();
+            chooserModifier.accept(fileChooser);
+            Optional.ofNullable(fileChooser.showOpenMultipleDialog(null)).ifPresent(onSelected);
+        });
     }
 
     public static void openFileSaver(Consumer<FileChooser> chooserModifier, Consumer<File> onSave) {
-        var fileChooser = new FileChooser();
-        chooserModifier.accept(fileChooser);
-        Optional.ofNullable(fileChooser.showSaveDialog(null)).ifPresent(onSave);
+        Platform.runLater(() -> {
+            var fileChooser = new FileChooser();
+            chooserModifier.accept(fileChooser);
+            Optional.ofNullable(fileChooser.showSaveDialog(null)).ifPresent(onSave);
+        });
     }
 
     public static void openDirectorySelector(Consumer<DirectoryChooser> chooserModifier, Consumer<File> onSelected) {
-        var fileChooser = new DirectoryChooser();
-        chooserModifier.accept(fileChooser);
-        Optional.ofNullable(fileChooser.showDialog(null)).ifPresent(onSelected);
+        Platform.runLater(() -> {
+            var fileChooser = new DirectoryChooser();
+            chooserModifier.accept(fileChooser);
+            Optional.ofNullable(fileChooser.showDialog(null)).ifPresent(onSelected);
+        });
     }
 
     public static File givenOrParentDir(File file) {

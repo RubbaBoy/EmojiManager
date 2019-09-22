@@ -10,10 +10,13 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import net.dv8tion.jda.api.JDA;
 import org.apache.commons.io.FileUtils;
 import org.hsqldb.lib.FileUtil;
 import org.slf4j.ILoggerFactory;
@@ -78,6 +81,7 @@ public class Emojis extends Stage implements GUITab {
     private Pane cachedPane;
     private SearchHelper searchHelper;
     private EmojiManager emojiManager;
+    private JDA jda;
     private BiConsumer<EmojiCell, Boolean> onSelectCell;
     private List<EmojiCell> originalCells = Collections.synchronizedList(new ArrayList<>());
     private List<EmojiCell> selected = Collections.synchronizedList(new ArrayList<>());
@@ -85,6 +89,7 @@ public class Emojis extends Stage implements GUITab {
 
     public Emojis(EmojiManager emojiManager) {
         this.emojiManager = emojiManager;
+        jda = emojiManager.getJda();
     }
 
     @Override
@@ -102,6 +107,29 @@ public class Emojis extends Stage implements GUITab {
     private CompletableFuture<Pane> checkEmojis() {
         return CompletableFuture.supplyAsync(() -> {
             if (emojiManager.haveEmojisChanged()) initEmojiCells();
+            Platform.runLater(() -> {
+                LOGGER.info("Shit");
+                var ctrlA = new KeyCodeCombination(KeyCode.A, KeyCodeCombination.CONTROL_DOWN);
+                cachedPane.setOnKeyPressed(event -> {
+                    LOGGER.info("Key press {}", event);
+                    if (ctrlA.match(event)) {
+                        selected = new ArrayList<>(originalCells);
+                        selected.forEach(EmojiCell::noEventSelect);
+                    } else if (event.getCode() == KeyCode.ESCAPE) {
+                        selected.forEach(EmojiCell::noEventUnSelect);
+                        selected.clear();
+                    } else {
+                        return;
+                    }
+
+                    var size = this.selected.size();
+                    downloadButton.setDisable(size == 0);
+                    deleteButton.setDisable(size == 0);
+
+                    downloadButton.setText("Download (" + size + ")");
+                    deleteButton.setText("Delete (" + size + ")");
+                });
+            });
             return cachedPane;
         });
     }
@@ -144,9 +172,7 @@ public class Emojis extends Stage implements GUITab {
                 chooser.setInitialDirectory(BACKUP_PARENT);
                 chooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Image", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp"));
             }, files -> {
-                emojiManager.uploadEmojis(files).thenRun(() -> {
-                    LOGGER.info("Completed uploading of emojis!");
-                });
+                emojiManager.uploadEmojis(files).thenRun(() -> LOGGER.info("Completed uploading of emojis!"));
             });
         });
 
@@ -174,9 +200,7 @@ public class Emojis extends Stage implements GUITab {
                                 fileServers.entrySet().stream().filter(entry -> servers.contains(entry.getKey())).forEach(entry -> {
                                     var files = entry.getValue();
                                     var server = entry.getKey();
-                                    files.forEach(file -> {
-                                        LOGGER.info("Uploading {} from server {}", file.getName(), server);
-                                    });
+                                    emojiManager.importEmojis(server, files);
                                 });
                             } catch (IOException e) {
                                 LOGGER.error("Error unzipping " + zipFile.getAbsolutePath(), e);
@@ -205,53 +229,71 @@ public class Emojis extends Stage implements GUITab {
 
                 var dateFormat = new SimpleDateFormat("MM-dd-yyyy__HH-mm-ss");
 
-                var zipFile = new File(BACKUP_PARENT, "backup_" + dateFormat.format(new Date(System.currentTimeMillis())) + ".zip");
-                try (var fos = new FileOutputStream(zipFile);
-                     var zos = new ZipOutputStream(fos)) {
-                    selected.parallelStream().map(EmojiCell::getEmoji).map(emoji -> {
-                        var file = new File(parent.toFile(), emoji.getName() + (emoji.isAnimated() ? ".gif" : ".png"));
+                FileDirectoryChooser.openFileSaver(fileChooser -> {
+                    fileChooser.setTitle("The backup save");
+                    fileChooser.setInitialDirectory(BACKUP_PARENT);
+                    fileChooser.setInitialFileName("backup_" + dateFormat.format(new Date(System.currentTimeMillis())) + ".zip");
+                    fileChooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Backup ZIP", "*.zip"));
+                }, zipFile -> {
+                    try (var fos = new FileOutputStream(zipFile);
+                         var zos = new ZipOutputStream(fos)) {
+                        selected.parallelStream().map(EmojiCell::getEmoji).map(emoji -> {
+                            var file = new File(parent.toFile(), emoji.getName() + (emoji.isAnimated() ? ".gif" : ".png"));
+                            try {
+                                var readableByteChannel = Channels.newChannel(new URL(emoji.getImage()).openStream());
+                                var fileOutputStream = new FileOutputStream(file);
+                                fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
+                            } catch (IOException e) {
+                                LOGGER.error("Error reading emoji " + emoji.getName() + " at URL " + emoji.getImage(), e);
+                            }
+                            return new AbstractMap.SimpleEntry<>(file, emoji.getServer());
+                        }).sequential().forEach(entry -> {
+                            var file = entry.getKey();
+                            var server = entry.getValue();
+                            try {
+                                zos.putNextEntry(new ZipEntry(server + "\\" + file.getName()));
+                                byte[] bytes = Files.readAllBytes(file.toPath());
+                                zos.write(bytes, 0, bytes.length);
+                                zos.closeEntry();
+                            } catch (IOException e) {
+                                LOGGER.error("Error adding files to ZIP", e);
+                            }
+                        });
+                        CompletableFuture.runAsync(() -> {
+                            try {
+                                Thread.sleep(1000);
+                                FileUtils.deleteDirectory(parent.toFile());
+                            } catch (InterruptedException | IOException e) {
+                                LOGGER.error("Error deleting temp directory", e);
+                            }
+                        });
+                    } catch (IOException e) {
+                        LOGGER.error("Error downloading emojis and creating ZIP", e);
+                    } finally {
+                        LOGGER.info("Completed zip in {}", BACKUP_PARENT.getAbsolutePath());
                         try {
-                            var readableByteChannel = Channels.newChannel(new URL(emoji.getImage()).openStream());
-                            var fileOutputStream = new FileOutputStream(file);
-                            fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
+                            AttributeUtils.write(zipFile, "Emojis", selected.size());
                         } catch (IOException e) {
-                            LOGGER.error("Error reading emoji " + emoji.getName() + " at URL " + emoji.getImage(), e);
+                            LOGGER.error("Error writing \"Emojis\" attribute to backup. This is not a critical action.", e);
                         }
-                        return new AbstractMap.SimpleEntry<>(file, emoji.getServer());
-                    }).sequential().forEach(entry -> {
-                        var file = entry.getKey();
-                        var server = entry.getValue();
-                        try {
-                            zos.putNextEntry(new ZipEntry(server + "\\" + file.getName()));
-                            byte[] bytes = Files.readAllBytes(file.toPath());
-                            zos.write(bytes, 0, bytes.length);
-                            zos.closeEntry();
-                        } catch (IOException e) {
-                            LOGGER.error("Error adding files to ZIP", e);
-                        }
-                    });
-                    FileUtils.deleteDirectory(parent.toFile());
-                } finally {
-                    LOGGER.info("Completed zip in {}", BACKUP_PARENT.getAbsolutePath());
-                    AttributeUtils.write(zipFile, "Emojis", selected.size());
-                }
+                    }
+                });
             } catch (IOException e) {
                 LOGGER.error("Error downloading emojis and creating ZIP", e);
             }
         });
 
         deleteButton.setOnMouseClicked(event -> {
-            LOGGER.info("Deleting {} emojis", selected.size());
-
             PopupHelper.createDialog("Deletion Confirm", "Are you sure you want to delete these " + selected.size() + " emojis?\n" +
                     "It is highly recommended to backup them first!", 1, Map.of(
                     "Yes",
-                    () -> {
-                        selected.forEach(cell -> {
-                            var emoji = cell.getEmoji();
-                            LOGGER.info("Deleting {}", emoji.getName());
-                        });
-                    },
+                    () -> selected.forEach(cell -> {
+                        var emote = jda.getEmoteById(cell.getEmoji().getId());
+                        if (emote != null) {
+                            LOGGER.info("Deleting {}", cell.getEmoji().getName());
+                            emote.delete().queue();
+                        }
+                    }),
                     "No",
                     PopupHelper.EMPTY_RUNNABLE
             ));

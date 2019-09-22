@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -100,8 +101,8 @@ public class EmojiManager extends ListenerAdapter {
             for (File file : files) {
                 var name = file.getName();
                 if (name.contains(".")) name = name.substring(0, name.indexOf('.'));
+                LOGGER.info("Creating emote {} on server {}", name, currServer.getId());
                 try {
-                    LOGGER.info("Creating emote {} on server {}", name, currServer.getId());
                     currServer.createEmote(name, Icon.from(file)).queue();
                     if (++currEmojiCount >= 50) {
                         currServer = getServer(servers);
@@ -112,6 +113,27 @@ public class EmojiManager extends ListenerAdapter {
                 }
             }
             if (files.isEmpty()) emojisChanged.set(true);
+        });
+    }
+
+    public void importEmojis(long server, List<File> files) {
+        LOGGER.info("Importing {} emojis to {}", files.size(), server);
+        var guild = jda.getGuildById(server);
+        if (guild == null) {
+            LOGGER.info("Guild {} not found!", server);
+            return;
+        }
+
+        guild.getEmotes().parallelStream().forEach(emote -> emote.delete().complete());
+        files.forEach(file -> {
+            var name = file.getName();
+            if (name.contains(".")) name = name.substring(0, name.indexOf('.'));
+            LOGGER.info("Creating emote {} on server {}", name, server);
+            try {
+                guild.createEmote(name, Icon.from(file)).queue();
+            } catch (IOException e) {
+                LOGGER.error("Error uploading emoji " + name, e);
+            }
         });
     }
 
