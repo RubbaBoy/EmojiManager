@@ -23,13 +23,14 @@ public class BackupSlot  {
     private static Logger LOGGER = LoggerFactory.getLogger(ServerSlot.class);
 
     private StackPane pane;
+    private final File file;
     private boolean selected;
     private BiConsumer<File, Boolean> onSelectedToggle;
     private String name;
 
-    public BackupSlot(String name, File file, long date, long size, int emojis, boolean selected) {
+    public BackupSlot(String name, File file, long date, long size, int emojis) {
         this.name = name;
-        this.selected = selected;
+        this.file = file;
         pane = new StackPane();
         pane.setPrefHeight(250);
         pane.setPrefWidth(250);
@@ -83,15 +84,6 @@ public class BackupSlot  {
         bottomText.setPrefWidth(250);
         bottomText.setAlignment(Pos.TOP_LEFT);
 
-        var checkBox = new CheckBox();
-        checkBox.setAlignment(Pos.TOP_RIGHT);
-        checkBox.setPadding(new Insets(0, 0, 75 - 15, 225 - 15));
-        checkBox.setSelected(selected);
-        checkBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
-            this.selected = newValue;
-            if (onSelectedToggle != null) onSelectedToggle.accept(file, newValue);
-        });
-
         pane.setOnMouseClicked(event -> {
             if (this.selected = !this.selected) {
                 paneClasses.add("selected");
@@ -99,11 +91,15 @@ public class BackupSlot  {
                 paneClasses.remove("selected");
             }
 
-            checkBox.setSelected(this.selected);
+            if (onSelectedToggle != null) onSelectedToggle.accept(file, selected);
         });
 
         contentContainer.getChildren().addAll(titleLabel, dateLabel, bottomText);
-        pane.getChildren().addAll(contentContainer, checkBox);
+        pane.getChildren().addAll(contentContainer);
+    }
+
+    public File getFile() {
+        return file;
     }
 
     public StackPane getPane() {
@@ -117,6 +113,12 @@ public class BackupSlot  {
 
     public boolean isSelected() {
         return selected;
+    }
+
+    public void noEventUnselect(File file) {
+        if (this.file.equals(file)) return;
+        selected = false;
+        pane.getStyleClass().remove("selected");
     }
 
     public String getName() {

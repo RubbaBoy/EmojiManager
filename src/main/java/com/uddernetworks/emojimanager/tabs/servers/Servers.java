@@ -50,7 +50,7 @@ public class Servers extends Stage implements GUITab {
     public void initialize(URL location, ResourceBundle resources) {
         LOGGER.info("Initializing server GUI...");
         var config = emojiManager.getConfigManager().getConfig();
-        List<Long> servers = config.get("servers");
+        var servers = new ArrayList<>(config.get("servers"));
 
         onServerEnableToggle = (serverId, enabled) -> {
             if (enabled) {

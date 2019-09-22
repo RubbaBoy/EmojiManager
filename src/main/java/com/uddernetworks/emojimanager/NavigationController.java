@@ -37,9 +37,8 @@ public class NavigationController extends Stage {
         menuList.setItems(new ObservableListWrapper<>(Arrays.asList(
                 new TabItem("Emojis", new Emojis(emojiManager)),
                 new TabItem("Servers", new Servers(emojiManager)),
-                new TabItem("Backups", new Backups(emojiManager)),
-                new TabItem("Settings", null))
-        ));
+                new TabItem("Backups", new Backups(emojiManager))
+        )));
 
         menuList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             LOGGER.info("Selected {}", newValue.getName());

@@ -1,10 +1,7 @@
 package com.uddernetworks.emojimanager.utils;
 
 import javax.swing.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -17,7 +14,7 @@ public class PopupHelper {
     }
 
     public static void createBlockingDialog(String title, String content, int initial, Map<String, Runnable> options) {
-        var displayingOptions = options.entrySet().stream().map(entry -> new NamedRunnable(entry.getKey(), entry.getValue())).collect(Collectors.toCollection(LinkedList::new));
+        var displayingOptions = new LinkedHashMap<>(options).entrySet().stream().map(entry -> new NamedRunnable(entry.getKey(), entry.getValue())).collect(Collectors.toCollection(LinkedList::new));
         displayingOptions.get(JOptionPane.showOptionDialog(null, content, title, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null,
                 displayingOptions.toArray(), displayingOptions.get(initial))).run();
     }

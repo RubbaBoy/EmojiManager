@@ -94,7 +94,6 @@ public class EmojiManager extends ListenerAdapter {
     public CompletableFuture<Void> uploadEmojis(List<File> files) {
         return CompletableFuture.runAsync(() -> {
             var servers = new LinkedList<>(config.<List<Long>>get("servers"));
-            LOGGER.info("Servers = {}", servers);
             Guild currServer = getServer(servers);
             var currEmojiCount = currServer.getEmotes().size();
 
@@ -116,8 +115,8 @@ public class EmojiManager extends ListenerAdapter {
         });
     }
 
-    public void importEmojis(long server, List<File> files) {
-        LOGGER.info("Importing {} emojis to {}", files.size(), server);
+    public void restoreEmojis(long server, List<File> files) {
+        LOGGER.info("Restoring {} emojis to {}", files.size(), server);
         var guild = jda.getGuildById(server);
         if (guild == null) {
             LOGGER.info("Guild {} not found!", server);

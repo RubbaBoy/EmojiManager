@@ -98,4 +98,10 @@ $fontSemibold: $fontRegular + " Semibold";
         -fx-font-family: $fontRegular, sans-serif;
         -fx-font-size: 21px;
     }
+
+    &.selected {
+        -fx-border-color: lighten(#426cad, 10%) !important;
+        -fx-border-width: 3px;
+        -fx-padding: -2px;
+    }
 }

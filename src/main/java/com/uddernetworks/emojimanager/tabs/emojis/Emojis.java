@@ -2,6 +2,7 @@ package com.uddernetworks.emojimanager.tabs.emojis;
 
 import com.uddernetworks.emojimanager.AttributeUtils;
 import com.uddernetworks.emojimanager.backend.EmojiManager;
+import com.uddernetworks.emojimanager.backend.RestoreManager;
 import com.uddernetworks.emojimanager.tabs.GUITab;
 import com.uddernetworks.emojimanager.utils.FileDirectoryChooser;
 import com.uddernetworks.emojimanager.utils.PopupHelper;
@@ -70,10 +71,10 @@ public class Emojis extends Stage implements GUITab {
     private Button uploadButton;
 
     @FXML
-    private Button importButton;
+    private Button restoreButton;
 
     @FXML
-    private Button downloadButton;
+    private Button backupButton;
 
     @FXML
     private Button deleteButton;
@@ -82,6 +83,7 @@ public class Emojis extends Stage implements GUITab {
     private SearchHelper searchHelper;
     private EmojiManager emojiManager;
     private JDA jda;
+    private RestoreManager restoreManager;
     private BiConsumer<EmojiCell, Boolean> onSelectCell;
     private List<EmojiCell> originalCells = Collections.synchronizedList(new ArrayList<>());
     private List<EmojiCell> selected = Collections.synchronizedList(new ArrayList<>());
@@ -90,6 +92,7 @@ public class Emojis extends Stage implements GUITab {
     public Emojis(EmojiManager emojiManager) {
         this.emojiManager = emojiManager;
         jda = emojiManager.getJda();
+        restoreManager = new RestoreManager(emojiManager);
     }
 
     @Override
@@ -108,10 +111,8 @@ public class Emojis extends Stage implements GUITab {
         return CompletableFuture.supplyAsync(() -> {
             if (emojiManager.haveEmojisChanged()) initEmojiCells();
             Platform.runLater(() -> {
-                LOGGER.info("Shit");
                 var ctrlA = new KeyCodeCombination(KeyCode.A, KeyCodeCombination.CONTROL_DOWN);
                 cachedPane.setOnKeyPressed(event -> {
-                    LOGGER.info("Key press {}", event);
                     if (ctrlA.match(event)) {
                         selected = new ArrayList<>(originalCells);
                         selected.forEach(EmojiCell::noEventSelect);
@@ -123,10 +124,10 @@ public class Emojis extends Stage implements GUITab {
                     }
 
                     var size = this.selected.size();
-                    downloadButton.setDisable(size == 0);
+                    backupButton.setDisable(size == 0);
                     deleteButton.setDisable(size == 0);
 
-                    downloadButton.setText("Download (" + size + ")");
+                    backupButton.setText("Backup (" + size + ")");
                     deleteButton.setText("Delete (" + size + ")");
                 });
             });
@@ -146,10 +147,10 @@ public class Emojis extends Stage implements GUITab {
             }
 
             var size = this.selected.size();
-            downloadButton.setDisable(size == 0);
+            backupButton.setDisable(size == 0);
             deleteButton.setDisable(size == 0);
 
-            downloadButton.setText("Download (" + size + ")");
+            backupButton.setText("Backup (" + size + ")");
             deleteButton.setText("Delete (" + size + ")");
         };
 
@@ -176,52 +177,9 @@ public class Emojis extends Stage implements GUITab {
             });
         });
 
-        importButton.setOnMouseClicked(event -> {
-            PopupHelper.createDialog("Import Confirm", "Are you sure you want to import these emojis? This will remove all emojis in the backed up servers\n" +
-                    "(Assuming they are still enabled in the \"Servers\" tab) and re-add them. If you want to simply add\n" +
-                    "emojis, click the \"Upload\" button, which will upload them to whatever available servers are present.", 1, Map.of(
-                    "Yes",
-                    () -> {
-                        LOGGER.info("Choosing backup file...");
+        restoreButton.setOnMouseClicked(event -> restoreManager.restoreEmojis());
 
-                        FileDirectoryChooser.openFileSelector(chooser -> {
-                            chooser.setTitle("Choose backup zip");
-                            chooser.setInitialDirectory(BACKUP_PARENT);
-                            chooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Backup ZIP", "*.zip"));
-                        }, zipFile -> {
-                            LOGGER.info("Selected {}", zipFile.getAbsolutePath());
-
-                            File parent = null;
-                            try {
-                                parent = Files.createTempDirectory("backup-zip").toFile();
-
-                                List<Long> servers = emojiManager.getConfigManager().getConfig().get("servers");
-                                var fileServers = unZip(zipFile, parent);
-                                fileServers.entrySet().stream().filter(entry -> servers.contains(entry.getKey())).forEach(entry -> {
-                                    var files = entry.getValue();
-                                    var server = entry.getKey();
-                                    emojiManager.importEmojis(server, files);
-                                });
-                            } catch (IOException e) {
-                                LOGGER.error("Error unzipping " + zipFile.getAbsolutePath(), e);
-                            } finally {
-                                if (parent != null) {
-                                    try {
-                                        FileUtils.deleteDirectory(parent);
-                                    } catch (IOException e) {
-                                        LOGGER.error("Error deleting temp directory " + parent.getAbsolutePath(), e);
-                                    }
-                                }
-                            }
-
-                        });
-                    },
-                    "No",
-                    PopupHelper.EMPTY_RUNNABLE
-            ));
-        });
-
-        downloadButton.setOnMouseClicked(event -> {
+        backupButton.setOnMouseClicked(event -> {
             LOGGER.info("Downloading {} emojis", selected.size());
             try {
                 var parent = Files.createTempDirectory("em");
@@ -317,34 +275,5 @@ public class Emojis extends Stage implements GUITab {
 
     private void updateSearch() {
         emojiContent.getChildren().setAll(searchHelper.search(lastSearchText, unanimated.isSelected(), animated.isSelected(), regex.isSelected()));
-    }
-
-    private static Map<Long, List<File>> unZip(File zipFile, File dest) {
-        var map = new HashMap<Long, List<File>>();
-        if (!dest.exists()) dest.mkdirs();
-        var buffer = new byte[1024];
-        try (var fis = new FileInputStream(zipFile);
-             var zis = new ZipInputStream(fis)) {
-            var ze = zis.getNextEntry();
-            while (ze != null) {
-                var fileName = ze.getName();
-                var newFile = new File(dest, fileName);
-                LOGGER.info("Unzipping to {}", newFile.getAbsolutePath());
-                var parent = new File(newFile.getParent());
-                parent.mkdirs();
-                map.computeIfAbsent(Long.parseLong(parent.getName()), i -> new ArrayList<>()).add(newFile);
-                try (var fos = new FileOutputStream(newFile)) {
-                    for (int len; (len = zis.read(buffer)) > 0; ) {
-                        fos.write(buffer, 0, len);
-                    }
-                }
-                zis.closeEntry();
-                ze = zis.getNextEntry();
-            }
-            zis.closeEntry();
-        } catch (IOException e) {
-            LOGGER.error("Error unzipping {}", zipFile.getAbsolutePath());
-        }
-        return map;
     }
 }
