@@ -10,9 +10,8 @@ XMLHttpRequest.prototype.wrappedSetRequestHeader = XMLHttpRequest.prototype.setR
 
 Here's some screenshots of the program:
 
-![Emojis Tab](https://github.com/RubbaBoy/EmojiManager/screenshots/emojis.png)
+![Emojis Tab](https://github.com/RubbaBoy/EmojiManager/blob/master/screenshots/emojis.png)
 
-![Emojis Tab](https://github.com/RubbaBoy/EmojiManager/screenshots/servers.png)
+![Emojis Tab](https://github.com/RubbaBoy/EmojiManager/blob/master/screenshots/servers.png)
 
-![Emojis Tab](https://github.com/RubbaBoy/EmojiManager/screenshots/backups.png)
-
+![Emojis Tab](https://github.com/RubbaBoy/EmojiManager/blob/master/screenshots/backups.png)
